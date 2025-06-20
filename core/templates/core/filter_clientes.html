@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Clientes Filtrados{% endblock %}
+{% block content %}
+<h1>Clientes Filtrados</h1>
+{% if clientes %}
+<table>
+    <tr>
+        <th>Nombre</th>
+        <th>Email</th>
+        <th>Fecha Registro</th>
+        <th>Dirección</th>
+        <th>Teléfono</th>
+    </tr>
+    {% for cliente in clientes %}
+    <tr>
+        <td>{{ cliente.nombre }}</td>
+        <td>{{ cliente.email }}</td>
+        <td>{{ cliente.fecha_registro|date:"Y-m-d" }}</td>
+        <td>{{ cliente.direccion }}</td>
+        <td>{{ cliente.telefono }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>No se encontraron clientes.</p>
+{% endif %}
+{% endblock %}

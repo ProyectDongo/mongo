@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<h1>Base de Datos de E-commerce</h1>
+{% if not clientes and not pedidos %}
+    <p>La base de datos está vacía. Por favor, ingrese datos:</p>
+    <a href="{% url 'insert_cliente' %}">Insertar Cliente</a> |
+    <a href="{% url 'insert_pedido' %}">Insertar Pedido</a>
+{% else %}
+    <h2>Clientes</h2>
+    <table>
+        <tr>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Fecha Registro</th>
+            <th>Dirección</th>
+            <th>Teléfono</th>
+        </tr>
+        {% for cliente in clientes %}
+        <tr>
+            <td>{{ cliente.nombre }}</td>
+            <td>{{ cliente.email }}</td>
+            <td>{{ cliente.fecha_registro|date:"Y-m-d" }}</td>
+            <td>{{ cliente.direccion }}</td>
+            <td>{{ cliente.telefono }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <h2>Pedidos</h2>
+    <table>
+        <tr>
+            <th>Cliente ID</th>
+            <th>Fecha Pedido</th>
+            <th>Monto Total</th>
+            <th>Productos</th>
+        </tr>
+        {% for pedido in pedidos %}
+        <tr>
+            <td>{{ pedido.cliente_id }}</td>
+            <td>{{ pedido.fecha_pedido|date:"Y-m-d" }}</td>
+            <td>{{ pedido.monto_total }}</td>
+            <td>{{ pedido.productos|json_script:"productos" }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endif %}
+{% endblock %}

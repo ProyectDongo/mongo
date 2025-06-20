@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Insertar Cliente{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header bg-primary text-white">Insertar Cliente</div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_nombre">Nombre:</label>
+                {{ form.nombre }}
+            </div>
+            <div class="form-group">
+                <label for="id_email">Email:</label>
+                {{ form.email }}
+            </div>
+            <div class="form-group">
+                <label for="id_fecha_registro">Fecha de registro:</label>
+                {{ form.fecha_registro }}
+            </div>
+            <div class="form-group">
+                <label for="id_direccion">Dirección:</label>
+                {{ form.direccion }}
+            </div>
+            <div class="form-group">
+                <label for="id_telefono">Teléfono:</label>
+                {{ form.telefono }}
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Insertar</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
