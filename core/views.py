@@ -20,17 +20,6 @@ def get_mongo_client(request):
     - Intenta establecer la conexión con pymongo.MongoClient y verifica su validez con server_info().
     - Retorna el cliente si la conexión es exitosa; de lo contrario, retorna None.
 
-    Justificación:
-    - Centraliza la lógica de conexión a MongoDB, reutilizable por todas las vistas.
-    - Almacenar credenciales en la sesión permite autenticación persistente sin repetir solicitudes al usuario.
-    - server_info() asegura que las credenciales sean válidas antes de continuar, previniendo errores posteriores.
-
-    Ejemplo:
-    - Si request.session tiene mongo_username="admin" y mongo_password="1234", intenta conectar a:
-      "mongodb+srv://admin:1234@cluster0.cc5wfzr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0".
-    - Si las credenciales son válidas, retorna un cliente funcional; si no, retorna None.
-
-    Criterio: Base para la interacción segura y autenticada con MongoDB en todas las vistas.
     """
     username = request.session.get('mongo_username')
     password = request.session.get('mongo_password')
@@ -54,16 +43,6 @@ def mongo_login_required(view_func):
     - Si faltan, muestra un mensaje de error y redirige al login.
     - Si están presentes, permite la ejecución de la vista decorada.
 
-    Justificación:
-    - Implementa un control de acceso basado en autenticación, protegiendo datos sensibles.
-    - Usa el sistema de mensajes de Django para retroalimentación clara al usuario.
-    - Evita ejecución innecesaria de vistas si la autenticación falla.
-
-    Ejemplo:
-    - Si un usuario sin sesión intenta acceder a home_view, se redirige a /login con el mensaje:
-      "Por favor, ingrese las credenciales de MongoDB."
-
-    Criterio: Requerimiento de seguridad para restringir acceso a funcionalidades de la aplicación.
     """
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
@@ -87,17 +66,6 @@ def login_view(request):
     - Si el método es GET:
       - Renderiza el formulario de login vacío.
 
-    Justificación:
-    - Centraliza la autenticación en una vista dedicada.
-    - Usa formularios de Django para validar entrada, reduciendo riesgos de datos incorrectos.
-    - Proporciona retroalimentación inmediata al usuario con mensajes.
-
-    Ejemplo:
-    - Un usuario envía username="admin" y password="1234" vía POST.
-    - Si las credenciales son válidas, se redirige a /home con "Conexión exitosa a MongoDB."
-    - Si falla, permanece en login con "Credenciales inválidas."
-
-    Criterio: Punto de entrada para la autenticación, esencial para acceder a otras vistas.
     """
     if request.method == 'POST':
         form = MongoLoginForm(request.POST)
@@ -133,16 +101,6 @@ def home_view(request):
     - db['clientes'].find(): Recupera todos los clientes.
     - db['pedidos'].find(): Recupera todos los pedidos.
 
-    Justificación:
-    - find() sin filtros es adecuado para mostrar todos los datos en la página principal.
-    - El decorador asegura que solo usuarios autenticados vean esta información.
-    - Centraliza la visualización de datos clave de la aplicación.
-
-    Ejemplo:
-    - Un usuario autenticado ve una tabla con clientes (ej. "Juan, juan@gmail.com") y pedidos
-      (ej. "Pedido de $70 con 2 productos").
-
-    Criterio: Vista central para monitorear datos básicos de la aplicación.
     """
     client = get_mongo_client(request)
     if not client:
@@ -172,17 +130,6 @@ def insert_cliente(request):
     Sentencia MongoDB:
     - db['clientes'].insert_one(cliente_data): Inserta un documento en la colección clientes.
 
-    Justificación:
-    - insert_one es ideal para agregar un solo documento de manera eficiente.
-    - Ajustar fecha_registro asegura consistencia en el formato de fechas.
-    - La validación del formulario previene datos inválidos.
-
-    Ejemplo:
-    - Un usuario ingresa nombre="Juan", email="juan@gmail.com", fecha_registro="2025-06-27".
-    - Se inserta como {'nombre': 'Juan', 'email': 'juan@gmail.com', 'fecha_registro': datetime(2025, 6, 27, 0, 0)}.
-    - Redirige a /home con "Cliente insertado correctamente."
-
-    Criterio: Operación CRUD (Crear) para clientes.
     """
     client = get_mongo_client(request)
     if not client:
@@ -221,17 +168,6 @@ def insert_pedido(request):
     Sentencia MongoDB:
     - db['pedidos'].insert_one(pedido): Inserta un pedido con subdocumentos de productos.
 
-    Justificación:
-    - insert_one es eficiente para un solo pedido.
-    - El cálculo dinámico de monto_total asegura precisión basada en cantidades.
-    - Maneja subdocumentos (productos), típico en comercio electrónico.
-
-    Ejemplo:
-    - Cliente="Juan", productos=["Camisa" ($20, cant: 2), "Pantalón" ($30, cant: 1)], fecha="2025-06-27".
-    - Inserta: {'cliente_id': 'Juan_id', 'fecha_pedido': datetime(2025, 6, 27), 'monto_total': 70.0,
-                'productos': [{'producto_id': '1', 'nombre': 'Camisa', 'precio': 20.0, 'cantidad': 2}, ...]}.
-
-    Criterio: Operación CRUD (Crear) para pedidos con subdocumentos.
     """
     client = get_mongo_client(request)
     if not client:
@@ -294,14 +230,6 @@ def filter_clientes_ultimo_ano(request):
     - db['clientes'].find({'fecha_registro': {'$gte': hace_un_ano}}):
       Filtra clientes cuya fecha_registro sea >= hace_un_ano.
 
-    Justificación:
-    - $gte es ideal para rangos de fechas, eficiente con índice en fecha_registro.
-    - Útil para análisis de clientes recientes (ej. marketing).
-
-    Ejemplo:
-    - Si hoy es 27/06/2025, muestra clientes desde 27/06/2024 en adelante.
-
-    Criterio: 3.1.1 (Selección de filtros y condiciones).
     """
     client = get_mongo_client(request)
     db = client['ecommerce_db']
@@ -323,15 +251,6 @@ def filter_pedidos_monto_100(request):
     Sentencia MongoDB:
     - db['pedidos'].find({'monto_total': {'$gt': 100}}):
       Filtra pedidos con monto_total > 100.
-
-    Justificación:
-    - $gt es eficiente para comparaciones numéricas, útil con índice en monto_total.
-    - Identifica pedidos de alto valor para análisis de ventas.
-
-    Ejemplo:
-    - Muestra pedidos de $150, $200, pero no $90.
-
-    Criterio: 3.1.1 (Selección de filtros y condiciones).
     """
     client = get_mongo_client(request)
     db = client['ecommerce_db']
@@ -353,15 +272,6 @@ def filter_clientes_gmail(request):
     - db['clientes'].find({'email': {'$regex': '@gmail\\.com$', '$options': 'i'}}):
       Busca emails con dominio exacto @gmail.com.
 
-    Justificación:
-    - $regex permite búsquedas flexibles en texto, ideal para dominios.
-    - '$options': 'i' asegura coincidencias como "user@GMAIL.com".
-    - Útil para segmentación por proveedor de email.
-
-    Ejemplo:
-    - Coincide con "juan@gmail.com", no con "juan@yahoo.com".
-
-    Criterio: 3.1.2 (Uso de expresiones regulares).
     """
     client = get_mongo_client(request)
     db = client['ecommerce_db']
@@ -383,14 +293,6 @@ def filter_pedidos_2023(request):
     - db['pedidos'].find({'fecha_pedido': {'$gte': datetime(2023, 1, 1), '$lt': datetime(2024, 1, 1)}}):
       Filtra pedidos entre 01/01/2023 y 31/12/2023.
 
-    Justificación:
-    - Combinación de $gte y $lt es precisa para rangos anuales.
-    - Útil para reportes históricos, eficiente con índice en fecha_pedido.
-
-    Ejemplo:
-    - Muestra pedidos del 15/03/2023, pero no del 15/01/2024.
-
-    Criterio: 3.1.1 (Selección de filtros y condiciones).
     """
     client = get_mongo_client(request)
     db = client['ecommerce_db']
@@ -412,14 +314,6 @@ def filter_pedidos_producto_101(request):
     - db['pedidos'].find({'productos.producto_id': '101'}):
       Busca en subdocumentos productos donde producto_id sea '101'.
 
-    Justificación:
-    - La notación de punto es eficiente para arrays anidados.
-    - Útil para análisis de productos específicos, optimizable con índice.
-
-    Ejemplo:
-    - Muestra un pedido con productos [{'producto_id': '101', 'nombre': 'Camisa', ...}].
-
-    Criterio: 3.1.3 (Búsqueda en subdocumentos).
     """
     client = get_mongo_client(request)
     db = client['ecommerce_db']
@@ -445,14 +339,6 @@ def filter_clientes_pedidos_500_ultimo_ano(request):
     - db  db['clientes'].find({'_id': {'$in': cliente_ids}}):
       Busca clientes por IDs obtenidos.
 
-    Justificación:
-    - Combina múltiples condiciones y relaciones entre colecciones.
-    - $in optimiza la búsqueda de múltiples IDs.
-
-    Ejemplo:
-    - Si hoy es 27/06/2025, muestra clientes con pedidos > $500 desde 27/06/2024.
-
-    Criterio: 3.1.4 (Consultas complejas con relaciones).
     """
     client = get_mongo_client(request)
     if not client:
@@ -489,14 +375,6 @@ def insert_producto(request):
     - db['productos'].find_one({'_id': id_producto}): Verifica existencia.
     - db['productos'].insert_one(producto_data): Inserta el producto.
 
-    Justificación:
-    - find_one asegura unicidad del _id.
-    - Decimal128 mantiene precisión en precios.
-
-    Ejemplo:
-    - id_producto="102", nombre="Zapatos", precio=50. Inserta si "102" no existe.
-
-    Criterio: Operación CRUD (Crear) para productos.
     """
     client = get_mongo_client(request)
     if not client:
