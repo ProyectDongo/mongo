@@ -1,32 +1,49 @@
 {% extends 'base.html' %}
 {% block title %}Insertar Pedido{% endblock %}
 {% block content %}
-<div class="card">
+<div class="card w-100"> 
     <div class="card-header bg-primary text-white">Insertar Pedido</div>
     <div class="card-body">
         <form method="post">
             {% csrf_token %}
-            <div class="form-group">
-                <label for="id_cliente">Cliente:</label>
-                
-                {{ form.cliente }}
+            <!-- Campo Cliente -->
+            <div class="form-group row">
+                <label for="id_cliente" class="col-sm-2 col-form-label">Cliente:</label>
+                <div class="col-sm-10">
+                    {{ form.cliente }}
+                </div>
             </div>
-            <div class="form-group">
-                <label for="id_fecha_pedido">Fecha del pedido:</label>
-                {{ form.fecha_pedido }}
+            <!-- Campo Fecha -->
+            <div class="form-group row">
+                <label for="id_fecha_pedido" class="col-sm-2 col-form-label">Fecha del pedido:</label>
+                <div class="col-sm-10">
+                    {{ form.fecha_pedido }}
+                </div>
             </div>
-            <div class="form-group">
-                <label>Productos:</label>
-                {{ form.productos }}
-                {% for producto in productos %}
-                    <div class="form-group mt-2">
-                        <label for="cantidad_{{ producto.id_producto }}">Cantidad de {{ producto.nombre }}:</label>
-                        <input type="number" name="cantidad_{{ producto.id_producto }}" id="cantidad_{{ producto.id_producto }}" 
-                               min="0" value="1" class="form-control d-inline-block" style="width: 100px;">
-                    </div>
-                {% endfor %}
+            <!-- Campo Productos -->
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Productos:</label>
+                <div class="col-sm-10">
+                    {{ form.productos }}
+                    {% for producto in productos %}
+                        <div class="form-group mt-2">
+                            <label for="cantidad_{{ producto.id_producto }}">
+                                Cantidad de {{ producto.nombre }}:
+                            </label>
+                            <input type="number" name="cantidad_{{ producto.id_producto }}" 
+                                   id="cantidad_{{ producto.id_producto }}" 
+                                   min="0" value="1" class="form-control d-inline-block" 
+                                   style="width: 100px;">
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
-            <button type="submit" class="btn btn-primary btn-block">Insertar</button>
+            <!-- Botón de envío -->
+            <div class="form-group row">
+                <div class="col-sm-10 offset-sm-2">
+                    <button type="submit" class="btn btn-primary btn-block">Insertar</button>
+                </div>
+            </div>
         </form>
     </div>
 </div>

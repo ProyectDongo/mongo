@@ -40,7 +40,11 @@ class PedidoForm(forms.Form):
     cliente = forms.ChoiceField(
         choices=[],
         label='Cliente',
-        widget=forms.Select(attrs={'class': 'form-control', 'required': 'true'})
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'style': 'min-width: 300px;''min-height: 50px',  
+            'required': 'true'
+        })
     )
     fecha_pedido = forms.DateField(
         label='Fecha del pedido',

@@ -39,7 +39,13 @@
             <td>{{ pedido.cliente_id }}</td>
             <td>{{ pedido.fecha_pedido|date:"Y-m-d" }}</td>
             <td>{{ pedido.monto_total }}</td>
-            <td>{{ pedido.productos|json_script:"productos" }}</td>
+            <td>
+                <ul>
+                {% for producto in pedido.productos %}
+                    <li>{{ producto.nombre }} - Precio: {{ producto.precio }} - Cantidad: {{ producto.cantidad }}</li>
+                {% endfor %}
+                </ul>
+            </td>
         </tr>
         {% endfor %}
     </table>
